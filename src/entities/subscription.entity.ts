@@ -1,5 +1,5 @@
 
-import { SubscriptionPeriod } from 'src/enum/subscriptionperiod.enum'; 
+ 
 import {
   Column,
   Entity,
@@ -14,9 +14,18 @@ import { Purchase } from './purchase.entity';
 import { User } from './users.entity';
 
 @Entity({ name: 'subscription' })
-export class Suscription {
+export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
+
+   @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: false,
+  })
+  name: string;
+
+   
 
   @Column({
     type: 'timestamp',
@@ -30,12 +39,7 @@ export class Suscription {
     })
     isactive: boolean;
 
-@Column({
-    type: 'enum',
-    enum: SubscriptionPeriod,
-    default: SubscriptionPeriod.MONTHLY,
-  })
-  subscriptionperiod:SubscriptionPeriod;
+
 
 @ManyToOne(() => User, (users) => users.subscription)
   @JoinColumn({ name: 'user_id' })

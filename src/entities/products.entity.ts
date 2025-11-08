@@ -42,10 +42,8 @@ export class Products {
   })
   stock: number;
 
-  @Column({
-    type: 'boolean',
-  })
-  isDisponible: true;
+  @Column({ type: 'boolean', default: true })
+  isDisponible: boolean;
     
 
   @OneToMany(() => OrderDetail, (order_detail) => order_detail.products)

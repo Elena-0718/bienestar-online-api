@@ -13,9 +13,9 @@ const config: DataSourceOptions = {
   password: process.env.DB_PASSWORD,
   entities: ['dist/**/*.entity.js'],
   migrations: ['dist/migrations/*{.ts, .js}'],
-  logging: true, // muestra por consola la interaccion con la base de datos
+  logging: false, // muestra por consola la interaccion con la base de datos
   synchronize: true, // sincroniza las entidades con la base de datos
-  dropSchema: true, // limpia, borra y crea nuevamente todas las entidades
+  dropSchema: false, // limpia, borra y crea nuevamente todas las entidades
 };
 
 export default registerAs('typeorm', () => config);

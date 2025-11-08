@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Elena",
+    "lastName": "Rueda",
+    "email": "noridarueda37@gmail.com",
+    "phoneNumber": 3186844954,
+    "birthDate": "1991-03-20",
+    "userName": "ElenaRueda",
+    "password": "Elena123*",
+    "roles": "Admin"
+  },
+  {
+    "name": "Camila",
+    "lastName": "Torres",
+    "email": "camila.torres@gmail.com",
+    "phoneNumber": 3209876543,
+    "birthDate": "1995-07-12",
+    "userName": "CamilaTorres",
+    "password": "Camila123*",
+    "roles": "User"
+  }
+]

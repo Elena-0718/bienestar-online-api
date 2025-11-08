@@ -11,7 +11,7 @@ import {
 import { User } from './users.entity';
 import { OrderDetail } from './order_detail.entity';
 import { Pay } from './pay.entity';
-import { Suscription } from './subscription.entity';
+import { Subscription } from './subscription.entity';
 import { join } from 'path';
 
 @Entity({ name: 'purchase' })
@@ -56,8 +56,8 @@ export class Purchase {
     @JoinColumn({ name: 'pay_id' })
     pay: Pay[];
   
-    @OneToMany (() => Suscription, (subscription) => subscription.purchase)
+    @OneToMany (() => Subscription, (subscription) => subscription.purchase)
     @JoinColumn({ name: 'subscription_id' })
-    subscription: Suscription[];
+    subscription: Subscription[];
 
 }

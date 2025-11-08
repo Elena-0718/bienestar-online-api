@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, JoinColumn, } from "typeorm";
 import { Credential } from './credential.entity';
 import { Pay } from './pay.entity';
-import { Suscription } from './subscription.entity';
+import { Subscription } from './subscription.entity';
 
 @Entity({name:'users'})
 export class User {
@@ -57,7 +57,7 @@ export class User {
     credential_id: any;
 
    @OneToOne(() => Credential, (credential) => credential.user, { cascade: true })
-  @JoinColumn({ name: 'credential_id' }) // nombre de la columna FK en BD
+  @JoinColumn({ name: 'credential_id' })
   credential: Credential;
     purchase: any;
     
@@ -66,8 +66,8 @@ export class User {
   pay: Pay[];
     
 
-    @OneToMany(() => Suscription, (subscription) => subscription.user)
-    subscription: Suscription[];
+    @OneToMany(() => Subscription, (subscription) => subscription.user)
+    subscription: Subscription[];
 
     
 

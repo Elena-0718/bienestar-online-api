@@ -29,7 +29,7 @@ export class Credential {
   })
   roles: Roles;
 
-  @OneToOne(() => User, (user) => user.credential_id)
-  user_id: User;
-    user: any;
+ @OneToOne(() => User, (user) => user.credential)
+  user: User;
+    
 }
