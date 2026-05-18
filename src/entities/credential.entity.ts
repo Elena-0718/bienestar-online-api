@@ -1,25 +1,24 @@
-import { Roles } from 'src/enum/roles.enum';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Roles } from '../enum/roles.enum';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from './users.entity';
 
-@Entity({ name: 'credential' })
+@Entity({ name: 'credentials' })
 export class Credential {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
-  @Column({
-    type: 'varchar',
-    length: 100,
-    unique: true,
-    nullable: false,
-  })
-  userName: string;
+  @Column({ unique: true })
+  email: string;
 
-  @Column({
-    type: 'varchar',
-    length: 100,
-    nullable: false,
-  })
+  // 🔐 Nunca se retorna
+  @Column({ type: 'varchar', select: false })
   password: string;
 
   @Column({
@@ -27,9 +26,28 @@ export class Credential {
     enum: Roles,
     default: Roles.USER,
   })
-  roles: Roles;
+  role: Roles;
 
- @OneToOne(() => User, (user) => user.credential)
+  // ✅ AQUÍ ESTABA EL ERROR
+  @Column({
+    type: 'text',      // 👈 OBLIGATORIO
+    nullable: true,
+    select: false,
+  })
+  refreshToken: string | null;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @Column({ nullable: true })
+resetToken: string; 
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @OneToOne(() => User, (user) => user.credential)
   user: User;
-    
 }

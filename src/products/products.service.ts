@@ -1,62 +1,100 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { ProductRepository } from "./products.repository";
-import { CreateProductDto } from "./Dtos/createProduct.dto";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { ProductsRepository } from './products.repository';
+import { CreateProductDto } from './dtos/createProduct.dto';
+import { UpdateProductDto } from './dtos/updateProduct.dto';
+
 
 @Injectable()
-export class ProductService {
-  
+export class ProductsService {
   constructor(
-    private readonly productRepository: ProductRepository,
+    private readonly productsRepository: ProductsRepository,
   ) {}
 
-  //  Servicio para obtener un producto por UUID
-  async getProductByIdService(uuid: string) {
-    const result = await this.productRepository.getProductByIdRepository(uuid);
+  // ===============================
+  // OBTENER PRODUCTOS
+  // ===============================
 
-    if (!result.success) {
-      throw new NotFoundException(result.message);
+  async getAllProducts() {
+    return await this.productsRepository.getAllProductsRepository();
+  }
+
+  async getProductById(uuid: string) {
+    const product =
+      await this.productsRepository.getProductByIdRepository(uuid);
+
+    if (!product) {
+      throw new NotFoundException(
+        `Producto con ID ${uuid} no encontrado`,
+      );
     }
 
-    return {
-      message: "Producto encontrado correctamente",
-      product: result.data,
-    };
+    return product;
   }
 
-  // Servicio para Crear producto
-  async createProductService(createProductDto: CreateProductDto) {
-    const result = await this.productRepository.createProductRepository(createProductDto);
+  // ===============================
+  // CREAR PRODUCTO
+  // ===============================
 
-    return {
-      message: result.message,
-      product: result.data,
-    };
-  }
-async updateProductService(uuid: string, updateProductDto: CreateProductDto) {
-  const result = await this.productRepository.updateProductRepository(uuid, updateProductDto);
-
-  if (!result.success) {
-    throw new NotFoundException(result.message);
+  async createProduct(dto: CreateProductDto) {
+    try {
+      return await this.productsRepository.createProductRepository(dto);
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Error al crear el producto',
+      );
+    }
   }
 
-  return {
-    message: result.message,
-    data: result.data,
-  };
-}
+  // ===============================
+  // ACTUALIZAR PRODUCTO
+  // ===============================
 
-// Servicio para eliminar un producto
-async deleteProductService(uuid: string) {
-  const result = await this.productRepository.deleteProductRepository(uuid);
+  async updateProduct(uuid: string, dto: UpdateProductDto) {
+    const product =
+      await this.productsRepository.getProductByIdRepository(uuid);
 
-  if (!result.success) {
-    throw new NotFoundException(result.message);
+    if (!product) {
+      throw new NotFoundException(
+        `Producto con ID ${uuid} no encontrado`,
+      );
+    }
+
+    try {
+      return await this.productsRepository.updateProductRepository(
+        product,
+        dto,
+      );
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Error al actualizar el producto',
+      );
+    }
   }
 
-  return {
-    message: result.message,
-    data: result.data,
-  };
-}
+  // ===============================
+  // ELIMINAR PRODUCTO (SOFT DELETE)
+  // ===============================
 
+  async deleteProduct(uuid: string) {
+    const product =
+      await this.productsRepository.getProductByIdRepository(uuid);
+
+    if (!product) {
+      throw new NotFoundException(
+        `Producto con ID ${uuid} no encontrado`,
+      );
+    }
+
+    try {
+      return await this.productsRepository.deleteProductRepository(product);
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Error al eliminar el producto',
+      );
+    }
+  }
 }

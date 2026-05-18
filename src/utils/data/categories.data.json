@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Suplementación Deportiva",
+    "slug": "suplementacion-deportiva",
+    "description": "Productos para mejorar el rendimiento físico, fuerza, resistencia y recuperación.",
+    "sortOrder": 1
+  },
+  {
+    "name": "Nutrición Funcional",
+    "slug": "nutricion-funcional",
+    "description": "Alimentos y suplementos orientados a la salud integral y bienestar diario.",
+    "sortOrder": 2
+  },
+  {
+    "name": "Accesorios de Entrenamiento",
+    "slug": "accesorios-de-entrenamiento",
+    "description": "Accesorios para optimizar y complementar rutinas de ejercicio.",
+    "sortOrder": 3
+  },
+  {
+    "name": "Equipos de Ejercicio",
+    "slug": "equipos-de-ejercicio",
+    "description": "Equipos para entrenamiento físico en casa o gimnasio.",
+    "sortOrder": 4
+  },
+  {
+    "name": "Bienestar y Recuperación",
+    "slug": "bienestar-y-recuperacion",
+    "description": "Productos enfocados en recuperación muscular, relajación y cuidado corporal.",
+    "sortOrder": 5
+  }
+]

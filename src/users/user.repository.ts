@@ -1,125 +1,135 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { User } from '../entities/users.entity';
-import { CreateUserDto } from './Dtos/createUser.dto';
-import * as bcrypt from 'bcrypt';
-import { Credential } from '../entities/credential.entity';
-import { UpdateUserDto } from './Dtos/updateUser.dto';
+import { UpdateUserDto } from './dtos/updateUser.dto';
 
 @Injectable()
-export class UsersRepository {
-  subscriptionDataBase: any;
-  
- 
-  async getByUserPhoneNumber(phoneNumber: number) {
-     return await this.userDataBase.findOne({
-    where: { phoneNumber },
-  });
-  }
-  async getUserByEmail(email: string) {
-    return await this.userDataBase.findOne({
-    where: { email },
-  });
-  }
+export class UserRepository {
   constructor(
     @InjectRepository(User)
-    private readonly userDataBase: Repository<User>,
-
-    @InjectRepository(Credential)
-    private readonly credentialDataBase: Repository<Credential>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
-// metodo para obtener todos los usuarios
-  async getAllUsersRepository() {
-const users = await this.userDataBase.find({
-      relations: ['credential'],
-    });
-    return users;
+  // ===============================
+  // BÚSQUEDAS ESPECÍFICAS (PROFESIONAL)
+  // ===============================
+
+  /**
+   * Obtiene los pacientes filtrados por los planes permitidos.
+   * Navega de User -> Subscriptions -> Plan.
+   */
+  async findPatientsBySpecialtyRepository(plans: string[]): Promise<User[]> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .innerJoin('user.subscriptions', 'subscription')
+      .innerJoin('subscription.plan', 'plan')
+      .innerJoin('user.credential', 'credential') // ✅ JOIN CORRECTO
+      .where('plan.type IN (:...plans)', { plans })
+      .andWhere('credential.role = :role', { role: 'USER' }) // ✅ CORREGIDO
+      .andWhere('user.isActive = :active', { active: true })
+      .select([
+        'user.uuid',
+        'user.fullName',
+        'user.email',
+        'user.photoUrl',
+        'user.document',
+        'plan.name',
+        'plan.type',
+      ])
+      .orderBy('user.fullName', 'ASC')
+      .getMany();
   }
 
-// metodo para obtener un usuario por su ID
+  // ===============================
+  // BÚSQUEDAS GENERALES
+  // ===============================
 
-  async getUserByIdRepository(uuid: string) {
-    return await this.userDataBase.findOne({
-      where: { uuid: uuid },
+  async getUserByEmailRepository(email: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { email },
+      relations: ['credential', 'professionalProfile'],
+    });
+  }
+
+  async getUserByDocumentRepository(document: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { document },
       relations: ['credential'],
     });
-    }
+  }
 
-  // metodo para crear un nuevo usuario
-
-  async createUserRepository(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-    // Crear credenciales
-    const newCredential = this.credentialDataBase.create({
-      userName: createUserDto.userName,
-      password: hashedPassword,
+  async getUserByIdRepository(uuid: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { uuid },
+      relations: [
+        'credential',
+        'professionalProfile',
+        'subscriptions',
+        'subscriptions.plan',
+      ],
     });
-    await this.credentialDataBase.save(newCredential);
+  }
 
-    
-    const [day, month, year] = createUserDto.birthDate.split('/');
-    const newBirthDate = new Date(+year, +month - 1, +day);
-
-   
-    const newUser = this.userDataBase.create({
-      name: createUserDto.name,
-      lastName: createUserDto.lastName,
-      email: createUserDto.email,
-      phoneNumber: createUserDto.phoneNumber,
-      birthDate: newBirthDate,
-      credential: newCredential, 
+  async getAllUsersRepository(): Promise<User[]> {
+    return this.userRepository.find({
+      order: { fullName: 'ASC' },
+      relations: ['credential', 'professionalProfile'],
     });
+  }
 
-    await this.userDataBase.save(newUser);
+  // ===============================
+  // CREACIÓN
+  // ===============================
 
-    console.log(
-      `Usuario creado: ${newUser.name} (${newCredential.userName})`,
-    );
+  async createUserRepository(newUser: Partial<User>): Promise<User> {
+    const user = this.userRepository.create(newUser);
+    return this.userRepository.save(user);
+  }
+
+  // ===============================
+  // PERFIL DE USUARIO
+  // ===============================
+
+  async getUserProfileRepository(uuid: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { uuid },
+      relations: [
+        'credential',
+        'subscriptions',
+        'subscriptions.plan',
+        'professionalProfile',
+      ],
+    });
+  }
+
+  async updateUserProfileRepository(
+    userExists: User,
+    updateUserDto: UpdateUserDto,
+  ): Promise<{ message: string }> {
+    Object.assign(userExists, updateUserDto);
+
+    await this.userRepository.save(userExists);
 
     return {
-      message: `Usuario ${newUser.name} creado exitosamente en la base de datos.`,
+      message: 'Perfil de usuario actualizado correctamente.',
     };
   }
-    
-   //metodo para actualizar un usuario
-  async putUpdateUserRepository(
-    userExisting: User,
-    updateUserDto: UpdateUserDto,
-  ) {
-    if (updateUserDto.name) {
-      userExisting.name = updateUserDto.name;
-    }
 
-    if (updateUserDto.lastName) {
-      userExisting.lastName = updateUserDto.lastName;
-    }
+  // ===============================
+  // ELIMINACIÓN LÓGICA
+  // ===============================
 
-    if (updateUserDto.email) {
-      userExisting.email = updateUserDto.email;
-    }
+  async softDeleteUserRepository(
+    user: User,
+  ): Promise<{ message: string }> {
+    user.isActive = false;
 
-    if (updateUserDto.phoneNumber) {
-      userExisting.phoneNumber = updateUserDto.phoneNumber;
-    }
+    await this.userRepository.save(user);
 
-
-    if (updateUserDto.birthDate) {
-      userExisting.birthDate = new Date(updateUserDto.birthDate);
-    }
-
-    await this.userDataBase.save(userExisting);
-    return { message: 'Usuario actualizado exitosamente' };
+    return {
+      message: 'Usuario desactivado correctamente.',
+    };
   }
-
-  //metodo para hacer un softDelete del usuario
-
-  async deleteUserRepository(userExisting: User) {
-    userExisting.isActive = false;
-    await this.userDataBase.save(userExisting);
-    return { message: `El usuario ${userExisting.name} se desactivo` };
-  }
-
 }

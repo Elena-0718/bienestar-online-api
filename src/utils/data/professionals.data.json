@@ -1,0 +1,21 @@
+[
+  {
+    "userEmail": "camila.torres@gmail.com",
+    "type": "NUTRITIONIST",
+    "professionalTitle": "Nutricionista Clínica",
+    "licenseNumber": "COL-NUT-458712",
+    "yearsOfExperience": 6,
+    "bio": "Especialista en pérdida de peso y nutrición funcional."
+  },
+  {
+    "userEmail": "carlos.mendoza@gmail.com",
+    "type": "TRAINER",
+    "professionalTitle": "Médico Deportivo",
+    "licenseNumber": "COL-MED-889977",
+    "yearsOfExperience": 10,
+    "bio": "Experto en rehabilitación física y salud cardiovascular."
+  }
+]
+
+
+

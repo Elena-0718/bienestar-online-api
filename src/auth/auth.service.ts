@@ -1,72 +1,116 @@
-import { CredentialRepository } from "src/credential/credential.repository";
-import { LoginUserDto } from 'src/users/Dtos/loginUser.dto';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateUserDto } from "src/users/Dtos/createUser.dto";
-import { JwtService } from "@nestjs/jwt";
+
+import { CredentialRepository } from 'src/credential/credential.repository';
+import { LoginDto } from 'src/credential/dtos/login.dto';
+import { SignUpDto } from 'src/credential/dtos/sing-up.dto';
+import { UserRepository } from 'src/users/user.repository';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly credencialRepository: CredentialRepository,
-        private readonly jwtService: JwtService,
-    ) {}
-    
-async SingInService(loginUserDto: LoginUserDto) {
-        const credentialExisting = await this.credencialRepository.getCredentialByUsername(loginUserDto.userName,);
-        if (!credentialExisting) {
-            throw new NotFoundException("Credenciales invalidadas   ")
-    }
-    const validatePassword = await bcrypt.compare(loginUserDto.password, credentialExisting.password);
-    if (!validatePassword) {
-         throw new NotFoundException("Credenciales invalidadas   ")
-  }
-  if (credentialExisting.user.isActive === false) {
-      throw new ConflictException(
-        'El usuario esta inactivo comuniquese con el administrador',
-      );
-    }
-const payload = {
-      id: credentialExisting.user.uuid,
-      role: credentialExisting.roles,
-      username: credentialExisting.userName,
-    };
+  constructor(
+    private readonly credentialRepository: CredentialRepository,
+    private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
-    const token = this.jwtService.sign(payload);
+  /* ===============================
+      REGISTRO DE USUARIO
+  =============================== */
+  async signUpService(signUpDto: SignUpDto) {
+    const { createCredentialDto, createUserDto } = signUpDto;
 
-    return {
-      message: 'Inicio de sesion exitoso',
-      token,
-    };
-  }
-
-async RegistrarUsuarioService(createUserDto: CreateUserDto) {
-    // Verificar si ya existe el usuario
-    const userExisting = await this.credencialRepository.getCredentialByUsername(
-      createUserDto.userName,
+    const credentialExists = await this.credentialRepository.getCredentialByEmailRepository(
+      createCredentialDto.email,
     );
 
-    if (userExisting) {
-      throw new BadRequestException('El usuario ya existe');
+    if (credentialExists) {
+      throw new ConflictException('Este correo ya se encuentra registrado.');
     }
 
-    // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createCredentialDto.password, 10);
 
-    
-    const newUser = await this.credencialRepository.createCredential({
-      ...createUserDto,
+    const newCredential = await this.credentialRepository.postCreateCredentialRepository({
+      email: createCredentialDto.email,
       password: hashedPassword,
-      roles: createUserDto.roles || 'user',
     });
 
+    const userExists = await this.userRepository.getUserByEmailRepository(
+      createUserDto.email,
+    );
+
+    if (userExists) {
+      throw new ConflictException('El usuario ya existe.');
+    }
+
+    const newUser = await this.userRepository.createUserRepository({
+      fullName: createUserDto.fullName,
+      document: createUserDto.document,
+      birthDate: new Date(createUserDto.birthDate),
+      sex: createUserDto.sex,
+      phone: createUserDto.phone,
+      address: createUserDto.address, 
+      email: createUserDto.email,
+      objective: createUserDto.objective,
+      weight: createUserDto.weight,
+      height: createUserDto.height,
+      observations: createUserDto.observations,
+      photoUrl: createUserDto.photoUrl,
+      credential: newCredential,
+    });
+
+    const { password, ...credentialWithoutPassword } = newCredential;
+    const { credential, ...userWithoutCredential } = newUser as any;
+
     return {
-      message: 'Usuario registrado exitosamente',
+      message: 'Usuario registrado exitosamente.',
+      credential: credentialWithoutPassword,
+      profile: userWithoutCredential,
+    };
+  }
+
+  /* ===============================
+      LOGIN (CORREGIDO)
+  =============================== */
+  async signInService(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+    const credential = await this.credentialRepository.getCredentialByEmailRepository(email);
+
+    if (!credential || !credential.isActive) {
+      throw new UnauthorizedException('Credenciales incorrectas o cuenta inactiva.');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, credential.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales incorrectas.');
+    }
+
+    const payload = {
+      sub: credential.user.uuid,
+      email: credential.email,
+      role: credential.role,
+    };
+
+    // ✅ CAMBIO CLAVE: Devolvemos 'token' en lugar de 'accessToken' 
+    // para que coincida con lo que busca tu Frontend.
+    return {
+      message: 'Inicio de sesión exitoso.',
+      token: this.jwtService.sign(payload), 
       user: {
-        userName: newUser.userName,
-        hashedPassword: newUser.password,
-        role: newUser.roles,
-      },
+        id: credential.user.uuid,
+        name: credential.user.fullName,
+        email: credential.email,
+        address: credential.user.address, // Agregado para el Profile
+        photoUrl: credential.user.photoUrl, // Agregado para el Navbar
+        role: credential.role,
+      }
     };
   }
 }
-

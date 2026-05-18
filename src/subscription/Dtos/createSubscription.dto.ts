@@ -1,34 +1,51 @@
-import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsUUID,
+  IsEnum,
+  IsDateString,
+  IsOptional,
+} from 'class-validator';
+
+import { BillingCycle } from 'src/enum/billingcycle.enum';
 
 export class CreateSubscriptionDto {
-
-@IsNotEmpty({ message: 'El nombre es requerido' })
-  @IsString({
-    message: 'El nombre debe ser una cadena de caracteres',
+  @ApiProperty({
+    description: 'UUID del usuario que contrata el plan',
+    example: 'a12f3c3e-8c7a-4a9d-bc5f-123456789abc',
   })
+  @IsUUID()
+  userUuid: string;
 
-  @MinLength(3, {
-    message: 'El nombre debe tener minimo 3 caracteres',
+  @ApiProperty({
+    description: 'UUID del plan contratado',
+    example: 'b34f9c2e-2f9a-4d3c-bc8d-987654321abc',
   })
-  @MaxLength(25, {
-    message: 'El nombre no puede contener mas de 25 caracteres',
+  @IsUUID()
+  planUuid: string;
+
+  @ApiProperty({
+    description: 'Ciclo de facturación',
+    enum: BillingCycle,
+    example: BillingCycle.MONTHLY,
   })
+  @IsEnum(BillingCycle)
+  billingCycle: BillingCycle;
 
+  
 
+  @ApiProperty({
+    description: 'Fecha de inicio de la suscripción',
+    example: '2026-01-15',
+  })
+  @IsDateString()
+  startDate: string;
 
-  name: string;
-
-
-
-@IsNotEmpty({
-          message: 'La fecha es requerida',
-        })
- @Matches(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/, {
-          message: 'La fecha debe estar en formato dd/mm/aaaa',
-        })
-date: string;
-
-
-
-
+  @ApiProperty({
+    description: 'Fecha de finalización (opcional)',
+    example: '2026-02-15',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
 }

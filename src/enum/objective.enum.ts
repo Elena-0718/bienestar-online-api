@@ -1,0 +1,6 @@
+export enum Objective {
+  WEIGHT_LOSS = 'WEIGHT_LOSS',
+  GAIN_MUSCLE = 'GAIN_MUSCLE',
+  MAINTENANCE = 'MAINTENANCE',
+  HEALTH = 'HEALTH',
+}

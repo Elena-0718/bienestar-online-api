@@ -1,121 +1,179 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { UsersRepository } from './user.repository';
-import { CreateUserDto } from './Dtos/createUser.dto';
-import { UpdateUserDto } from './Dtos/updateUser.dto';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
+import { UserRepository } from './user.repository';
+import { UpdateUserDto } from './dtos/updateUser.dto';
+import { User } from '../entities/users.entity';
+import { ProfessionalType } from '../entities/professional.entity';
+import { PlanType } from '../entities/plan.entity';
 
 @Injectable()
-export class UsersService {
-  
- 
-  credentialRepository: any;
-  getUserByNameService(name: string) {
-    throw new Error('Method not implemented.');
-  }
-// Servicio para obtener todos los usuarios
-   getAllUserService() {
-    return this.usersRepository.getAllUsersRepository();
-  }
+export class UserService {
 
-    constructor(private readonly usersRepository: UsersRepository) {}
-    getAllUsersService() {
-        return this.usersRepository.getAllUsersRepository();
-    }
-    
+  constructor(
+    private readonly userRepository: UserRepository,
+  ) {}
 
-  //servicio para obtener un usuario por su id
-  async getUserByIdService(uuid: string) {
-    const userExisting = await this.usersRepository.getUserByIdRepository(uuid);
-    if (!userExisting) {
-      throw new NotFoundException('Este usuario no existe');
-    }
-    return userExisting;
-  }
- 
-// Servicio para crear un nuevo usuario
+  // ===============================
+  // 🔥 MÉTODO PARA PROFESIONALES (MIS PACIENTES)
+  // ===============================
 
-  async postCreateUserService(createUserDto: CreateUserDto) {
-    const emailExisting = 
-    await this.usersRepository.getUserByEmail(
-      createUserDto.email,);
-    if (emailExisting) {
-      throw new ConflictException('Este correo ya se encuentra registrado');
-    }
+  async getPatientsByProfessionalSpecialtyService(
+    req: { user: { userId: string } }
+  ): Promise<User[]> {
 
-    const usernameExisting =
-      await this.credentialRepository.getCredentialByUsername(
-        createUserDto.userName,
+    const professionalUuid = req.user.userId;
+
+    const professional =
+      await this.userRepository.getUserProfileRepository(professionalUuid);
+
+    if (!professional || !professional.professionalProfile) {
+      throw new NotFoundException(
+        'Perfil profesional no encontrado o tipo no asignado.',
       );
-    if (usernameExisting) {
+    }
+
+    const professionalType =
+      professional.professionalProfile.type;
+
+    let allowedPlans: string[] = [];
+
+    if (professionalType === ProfessionalType.NUTRITIONIST) {
+      allowedPlans = [
+        PlanType.NUTRITION,
+        PlanType.BIENESTAR,
+      ];
+    }
+
+    if (professionalType === ProfessionalType.SPORTS_DOCTOR) {
+      allowedPlans = [
+        PlanType.FITNESS,
+        PlanType.BIENESTAR,
+      ];
+    }
+
+    if (allowedPlans.length === 0) {
+      return [];
+    }
+
+    return this.userRepository.findPatientsBySpecialtyRepository(
+      allowedPlans,
+    );
+  }
+
+  // ===============================
+  // CONSULTATIONS
+  // ===============================
+
+  async findByUuid(userUuid: string): Promise<User> {
+    const user =
+      await this.userRepository.getUserByIdRepository(userUuid);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado.');
+    }
+
+    return user;
+  }
+
+  // ===============================
+  // ADMIN
+  // ===============================
+
+  async getAllUsersService(): Promise<User[]> {
+    return this.userRepository.getAllUsersRepository();
+  }
+
+  async getUserByIdService(userUuid: string): Promise<User> {
+    const user =
+      await this.userRepository.getUserByIdRepository(userUuid);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado.');
+    }
+
+    return user;
+  }
+
+  // ===============================
+  // PERFIL PROPIO
+  // ===============================
+
+  async getUserProfileService(req: {
+    user: { userId: string };
+  }): Promise<any> {
+
+    const userUuid = req.user.userId;
+
+    const user =
+      await this.userRepository.getUserProfileRepository(userUuid);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado.');
+    }
+
+    if (!user.isActive) {
       throw new ConflictException(
-        'Este nombre de usuario ya se encuentra en uso',
+        'Este perfil se encuentra desactivado.',
       );
     }
-    const phoneNumberExisting = await this.usersRepository.getByUserPhoneNumber(
-      createUserDto.phoneNumber,
+
+    const activeSubscription = user.subscriptions?.find(
+      (sub) => sub.status === 'ACTIVE'
     );
-    if (phoneNumberExisting) {
-      throw new ConflictException('Este numero de telefono ya esta en uso');
-    }
-    return this.usersRepository.createUserRepository(createUserDto);
+
+    return {
+      ...user,
+      planType: activeSubscription
+        ? activeSubscription.plan.type
+        : 'FREE',
+    };
   }
 
-  // Servicio para actualizar un usuario
+  async updateUserProfileService(
+    req: { user: { userId: string } },
+    updateUserDto: UpdateUserDto,
+  ): Promise<{ message: string }> {
 
-    async putUpdateUserService(updateUserDto: UpdateUserDto) {
-    const userExisting = await this.usersRepository.getUserByIdRepository(
-      updateUserDto.uuid,
-    );
-    if (!userExisting) {
-      throw new NotFoundException('No existe el usuario');
+    const userUuid = req.user.userId;
+
+    const user =
+      await this.userRepository.getUserByIdRepository(userUuid);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado.');
     }
-    if (userExisting.isActive === false) {
-      throw new ConflictException('Este usuario no esta activo');
-    }
-    if (updateUserDto.email) {
-      const emailExisting = await this.usersRepository.getUserByEmail(
-        updateUserDto.email,
+
+    if (!user.isActive) {
+      throw new ConflictException(
+        'Este usuario se encuentra desactivado.',
       );
-      if (emailExisting) {
-        throw new ConflictException('Este correo ya se encuentra registrado');
-      }
     }
 
-    if (updateUserDto.userName) {
-      const usernameExisting =
-        await this.credentialRepository.getCredentialByUsername(
-          updateUserDto.userName,
-        );
-      if (usernameExisting) {
-        throw new ConflictException(
-          'Este nombre de usuario ya se encuentra en uso',
-        );
-      }
-    }
-    if (updateUserDto.phoneNumber) {
-      const phoneNumberExisting =
-        await this.usersRepository.getByUserPhoneNumber(
-          updateUserDto.phoneNumber,
-        );
-      if (phoneNumberExisting) {
-        throw new ConflictException('Este numero de telefono ya esta en uso');
-      }
-    }
-    return this.usersRepository.putUpdateUserRepository(
-      userExisting,
+    return this.userRepository.updateUserProfileRepository(
+      user,
       updateUserDto,
     );
   }
-    //servicio para hacer un softDelete del usuario
-  async deleteUserService(uuid: string) {
-    const userExisting = await this.usersRepository.getUserByIdRepository(uuid);
-    if (!userExisting) {
-      throw new NotFoundException('No existe el usuario');
+
+  // ===============================
+  // DESACTIVAR USUARIO
+  // ===============================
+
+  async deactivateUserService(
+    userUuid: string,
+  ): Promise<{ message: string }> {
+
+    const user =
+      await this.userRepository.getUserByIdRepository(userUuid);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado.');
     }
-    if (userExisting.isActive === false) {
-      throw new ConflictException('Este usuario ya no se encuentra activo');
-    }
-    return this.usersRepository.deleteUserRepository(userExisting);
+
+    return this.userRepository.softDeleteUserRepository(user);
   }
 }
-

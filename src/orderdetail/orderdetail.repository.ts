@@ -1,94 +1,51 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Order } from 'src/entities/order.entity';
 import { OrderDetail } from 'src/entities/order_detail.entity';
-import { CreateOrdersDto } from "./Dtos/createOrders.dto";
 
 @Injectable()
 export class OrderDetailRepository {
   constructor(
     @InjectRepository(OrderDetail)
-    private readonly orderDetailDatabase: Repository<OrderDetail>,
+    private readonly orderDetailRepository: Repository<OrderDetail>,
   ) {}
 
-  //  Metodo para Obtener una orden por UUID
-  async getOrderDetailByIdRepository(uuid: string) {
-    const orderExisting = await this.orderDetailDatabase.findOne({ where: { uuid } });
-
-    if (!orderExisting) {
-      return {
-        success: false,
-        message: `El detalle de orden con UUID ${uuid} no existe.`,
-      };
-    }
-
-    return {
-      success: true,
-      data: orderExisting,
-    };
+  // =========================
+  // CREAR DETALLES
+  // =========================
+  async postCreateOrderDetailsRepository(details: OrderDetail[]) {
+    return this.orderDetailRepository.save(details);
   }
 
-  // Metodo para Crear una orden
-  async createOrderDetailRepository(createOrdersDto: CreateOrdersDto) {
-    const newOrderDetail = this.orderDetailDatabase.create({
-      cant: createOrdersDto.cant,
-      subTotal: createOrdersDto.subTotal,
-      iva: createOrdersDto.iva,
-      discount: createOrdersDto.discount,
+  // =========================
+  // ADMIN
+  // =========================
+  async getOrderDetailsAdminRepository(order: Order) {
+    return this.orderDetailRepository.find({
+      where: {
+        order: { uuid: order.uuid },
+      },
+      relations: ['product', 'order'],
     });
-
-    const savedOrder = await this.orderDetailDatabase.save(newOrderDetail);
-
-    console.log(`Orden creada: ${savedOrder.uuid}`);
-
-    return {
-      success: true,
-      message: `Orden registrada correctamente.`,
-      data: savedOrder,
-    };
   }
 
-  // Metodo para Actualizar una orden
-  async updateOrderDetailRepository(uuid: string, updateOrdersDto: CreateOrdersDto) {
-    const orderExisting = await this.orderDetailDatabase.findOne({ where: { uuid } });
-
-    if (!orderExisting) {
-      return {
-        success: false,
-        message: `El detalle de orden con UUID ${uuid} no existe.`,
-      };
-    }
-
-    orderExisting.cant = updateOrdersDto.cant;
-    orderExisting.subTotal = updateOrdersDto.subTotal;
-    orderExisting.iva = updateOrdersDto.iva;
-    orderExisting.discount = updateOrdersDto.discount;
-
-    const updatedOrder = await this.orderDetailDatabase.save(orderExisting);
-
-    return {
-      success: true,
-      message: `Detalle de orden actualizado correctamente.`,
-      data: updatedOrder,
-    };
-  }
-
-  //  Metodo para Eliminar una orden
-  async deleteOrderDetailRepository(uuid: string) {
-    const orderExisting = await this.orderDetailDatabase.findOne({ where: { uuid } });
-
-    if (!orderExisting) {
-      return {
-        success: false,
-        message: `El detalle de orden con UUID ${uuid} no existe.`,
-      };
-    }
-
-    await this.orderDetailDatabase.remove(orderExisting);
-
-    return {
-      success: true,
-      message: `El detalle de orden con UUID ${uuid} fue eliminado correctamente.`,
-    };
+  // =========================
+  // USER  ✅ AQUÍ ESTABA EL PROBLEMA
+  // =========================
+  async getOrderDetailsUserRepository(
+    order: Order,
+    userUuid: string,
+  ) {
+    return this.orderDetailRepository.find({
+      where: {
+        order: {
+          uuid: order.uuid,
+          user: { uuid: userUuid },
+        },
+      },
+      relations: ['product', 'order'],
+    });
   }
 }
+

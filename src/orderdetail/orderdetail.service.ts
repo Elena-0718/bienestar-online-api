@@ -1,39 +1,63 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { OrderDetailRepository } from "./orderdetail.repository";
-import { CreateOrdersDto } from "./Dtos/createOrders.dto";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+
+
+import { OrderRepository } from 'src/order/order.repository';
+import { Order } from 'src/entities/order.entity';
+import { OrderDetailRepository } from './orderdetail.repository';
 
 @Injectable()
 export class OrderDetailService {
-  constructor(private readonly orderDetailRepository: OrderDetailRepository) {}
- 
-//Servicio para obtener una orden por uuid
+  constructor(
+    private readonly orderDetailRepository: OrderDetailRepository,
+    private readonly orderRepository: OrderRepository,
+  ) {}
 
-  async getOrderDetailByIdService(uuid: string) {
-    const result = await this.orderDetailRepository.getOrderDetailByIdRepository(uuid);
-    if (!result.success) throw new NotFoundException(result.message);
-    return result;
+  /* =========================
+     ADMIN
+  ========================== */
+
+  async getOrderDetailsAdminService(uuid: string) {
+    // Validar si existe la orden
+    const orderExists: Order | null =
+      await this.orderRepository.getOrderByIdRepository(uuid);
+
+    if (!orderExists) {
+      throw new NotFoundException('Orden no encontrada.');
+    }
+
+    return this.orderDetailRepository.getOrderDetailsAdminRepository(
+      orderExists,
+    );
   }
 
- // Servicio para crear una orden
+  /* =========================
+     USER
+  ========================== */
 
-  async createOrderDetailService(createOrdersDto: CreateOrdersDto) {
-    return await this.orderDetailRepository.createOrderDetailRepository(createOrdersDto);
-  }
+  async getOrderDetailsUserService(req: any, uuid: string) {
+    const userUuid: string = req.user.user_uuid;
 
-//Servicio para actualizar una orden
+    // Validar si existe la orden
+    const orderExists: Order | null =
+      await this.orderRepository.getOrderByIdRepository(uuid);
 
-  async updateOrderDetailService(uuid: string, updateOrdersDto: CreateOrdersDto) {
-    const result = await this.orderDetailRepository.updateOrderDetailRepository(uuid, updateOrdersDto);
-    if (!result.success) throw new NotFoundException(result.message);
-    return result;
-  }
+    if (!orderExists) {
+      throw new NotFoundException('Orden no encontrada.');
+    }
 
-//Servicio para eliminar una orden
+    // Validar que la orden pertenezca al usuario
+    if (orderExists.user.uuid !== userUuid) {
+      throw new ForbiddenException('No tienes acceso a esta orden.');
+    }
 
-  async deleteOrderDetailService(uuid: string) {
-    const result = await this.orderDetailRepository.deleteOrderDetailRepository(uuid);
-    if (!result.success) throw new NotFoundException(result.message);
-    return result;
+    return this.orderDetailRepository.getOrderDetailsUserRepository(
+      orderExists,
+      userUuid,
+    );
   }
 }
 

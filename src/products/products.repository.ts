@@ -1,106 +1,124 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Products } from "src/entities/products.entity"; 
-import { CreateProductDto } from "./Dtos/createProduct.dto";
+// src/products/products.repository.ts
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Product } from 'src/entities/products.entity';
+import { Category } from 'src/entities/category.entity';
+import { CreateProductDto } from './dtos/createProduct.dto';
+import { UpdateProductDto } from './dtos/updateProduct.dto';
 
 @Injectable()
-export class ProductRepository {
-    productRepository: any;
-  
+export class ProductsRepository {
+  getProductById(product_uuid: string) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
-    @InjectRepository(Products)
-    private readonly productDataBase: Repository<Products>,
+    @InjectRepository(Product)
+    private readonly productsDB: Repository<Product>,
+
+    @InjectRepository(Category)
+    private readonly categoriesDB: Repository<Category>,
   ) {}
 
-  //  Método para obtener un producto por su UUID
-  async getProductByIdRepository(uuid: string) {
-    const productExisting = await this.productDataBase.findOne({
-      where: { uuid },
+  // ===============================
+  // OBTENER PRODUCTOS
+  // ===============================
+
+  async getAllProductsRepository(): Promise<Product[]> {
+    return this.productsDB.find({
+      where: { isActive: true },
+      relations: ['category'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getProductByIdRepository(uuid: string): Promise<Product | null> {
+    return this.productsDB.findOne({
+      where: { uuid, isActive: true },
+      relations: ['category'],
+    });
+  }
+
+  async getProductByNameRepository(name: string): Promise<Product | null> {
+    return this.productsDB.findOne({
+      where: { name, isActive: true },
+    });
+  }
+
+  // ===============================
+  // CREAR PRODUCTO
+  // ===============================
+
+  async createProductRepository(
+    dto: CreateProductDto,
+  ): Promise<Product> {
+    // Validar categoría
+    const category = await this.categoriesDB.findOne({
+      where: { uuid: dto.categoryUuid },
     });
 
-    if (!productExisting) {
-      console.log(`Producto con UUID ${uuid} no encontrado.`);
-      return {
-        success: false,
-        message: `El producto con UUID ${uuid} no existe.`,
-      };
+    if (!category) {
+      throw new Error('La categoría no existe.');
     }
 
-    console.log(` Producto encontrado: ${productExisting.name}`);
-    return {
-      success: true,
-      data: productExisting,
-    };
-  }
+    // Validar producto duplicado
+    const existingProduct = await this.getProductByNameRepository(dto.name);
 
-  // Metodo para Crear producto
-   async createProductRepository(createProductDto: CreateProductDto) {
-    console.log('Creando nuevo producto...');
+    if (existingProduct) {
+      throw new Error('Ya existe un producto con ese nombre.');
+    }
 
-    const newProduct = this.productDataBase.create({
-      name: createProductDto.name,
-      description: createProductDto.description,
-      price: createProductDto.price,
-      stock: createProductDto.stock,
+    const newProduct = this.productsDB.create({
+      name: dto.name,
+      description: dto.description,
+      price: dto.price,
+      stock: dto.stock,
+      category,
     });
 
-    const savedProduct = await this.productDataBase.save(newProduct);
-
-    console.log(`Producto creado: ${savedProduct.uuid}`);
-
-    return {
-      success: true,
-      message: "Producto registrado correctamente.",
-      data: savedProduct,
-    };
+    return await this.productsDB.save(newProduct);
   }
 
-  // Metodo para actualizar
- async updateProductRepository(uuid: string, updateProductDto: CreateProductDto) {
-  const productExisting = await this.productDataBase.findOne({ where: { uuid } });
+  // ===============================
+  // ACTUALIZAR PRODUCTO
+  // ===============================
 
-  if (!productExisting) {
-    return {
-      success: false,
-      message: `El producto con UUID ${uuid} no existe.`,
-    };
+  async updateProductRepository(
+    product: Product,
+    dto: UpdateProductDto,
+  ): Promise<Product> {
+    if (dto.name !== undefined) product.name = dto.name;
+    if (dto.description !== undefined)
+      product.description = dto.description;
+    if (dto.price !== undefined) product.price = dto.price;
+    if (dto.stock !== undefined) product.stock = dto.stock;
+
+    if (dto.categoryUuid) {
+      const category = await this.categoriesDB.findOne({
+        where: { uuid: dto.categoryUuid },
+      });
+
+      if (!category) {
+        throw new Error('La categoría no existe.');
+      }
+
+      product.category = category;
+    }
+
+    return await this.productsDB.save(product);
   }
 
-  productExisting.name = updateProductDto.name;
-  productExisting.description = updateProductDto.description;
-  productExisting.price = updateProductDto.price;
-  productExisting.stock = updateProductDto.stock;
+  // ===============================
+  // BORRADO LÓGICO
+  // ===============================
 
-  const updatedProduct = await this.productDataBase.save(productExisting);
+  async deleteProductRepository(product: Product) {
+    product.isActive = false;
+    await this.productsDB.save(product);
 
-  console.log(`Producto actualizado: ${updatedProduct.uuid}`);
-
-  return {
-    success: true,
-    message: `Producto actualizado correctamente.`,
-    data: updatedProduct,
-  };
-}
-
-// Método para eliminar producto
-async deleteProductRepository(uuid: string) {
-  const product = await this.productDataBase.findOne({ where: { uuid } });
-
-  if (!product) {
     return {
-      success: false,
-      message: `El producto con UUID ${uuid} no existe.`,
+      message: `El producto "${product.name}" fue desactivado correctamente.`,
     };
   }
-
-  await this.productDataBase.remove(product);
-
-  return {
-    success: true,
-    message: `Producto eliminado correctamente.`,
-    data: product,
-  };
-}
-
 }

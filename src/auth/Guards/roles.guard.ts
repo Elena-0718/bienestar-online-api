@@ -5,41 +5,39 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
 import { Roles } from 'src/enum/roles.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+
+  canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<Roles[]>(
       'roles',
       [context.getHandler(), context.getClass()],
     );
-    console.log('Roles requeridos para esta ruta:', requiredRoles);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest();
+    const user = request.user as { role?: Roles };
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const payload = request.user;
-    console.log('Payload del usuario en el guard de roles:', payload);
+    if (!user) {
+      throw new ForbiddenException('Usuario no autenticado.');
+    }
 
-    const hasRole = () =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      requiredRoles.some((role) => payload?.role?.includes(role));
+    if (!user.role) {
+      throw new ForbiddenException('No tienes un rol asignado.');
+    }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const validate = payload && payload.role && hasRole();
-
-    console.log('Validacion de roles en el guard:', validate);
-    if (!validate) {
+    if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException(
-        'No tienes permisos para acceder a este contenido ',
+        'No tienes permisos para acceder a este recurso.',
       );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return validate;
+
+    return true;
   }
 }
