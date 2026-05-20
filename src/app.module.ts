@@ -18,16 +18,16 @@ import { Credential } from './entities/credential.entity';
 /* ===== MÓDULOS ===== */
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/users.module';
-import { CredentialModule } from './credential/credential.module';
+import { CredentialModule } from './credentials/credential.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CartModule } from './cart/cart.module';
 
 import { OrderModule } from './order/order.module';
-import { OrderDetailModule } from './orderdetail/orderdetail.module';
-import { PaymentModule } from './payment/payment.module';
-import { SubscriptionModule } from './subscription/subscription.module';
-import { PlanModule } from './plan/plan.module';
+import { OrderDetailModule } from './order-details/orderdetail.module';
+import { PaymentModule } from './payments/payment.module';
+import { SubscriptionModule } from './subscriptions/subscription.module';
+import { PlanModule } from './plans/plan.module';
 import { WorkoutModule } from './workout/workout.module';
 import { ProgressModule } from './progress/progress.module';
 import { ConsultationModule } from './consultation/consultation.module';
@@ -35,7 +35,7 @@ import { ProfessionalModule } from './professional/professional.module';
 import { SupportModule } from './support/support.module';
 import { NutritionModule } from './nutrition/nutrition.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { CartDetailModule } from './cartDetail/cartDetail.module';
+import { CartDetailModule } from './cart-details/cartDetail.module';
 import { DeliveryModule } from './delivery/delivery.module';
 
 @Module({

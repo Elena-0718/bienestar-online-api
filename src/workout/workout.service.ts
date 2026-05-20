@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { WorkoutRepository } from './workout.repository';
-import { SubscriptionRepository } from 'src/subscription/subscription.repository';
+import { SubscriptionRepository } from 'src/subscriptions/subscription.repository';
 import { ProfessionalRepository } from 'src/professional/professional.repository';
 
 import { WorkoutPlan } from 'src/entities/workout.entity';

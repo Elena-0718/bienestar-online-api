@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NutritionPlan } from 'src/entities/nutrition-plan.entity';
 
-import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { SubscriptionModule } from 'src/subscriptions/subscription.module';
 import { ProfessionalModule } from 'src/professional/professional.module'; // 👈 CLAVE
 
 import { NutritionRepository } from './nutrition.repository';

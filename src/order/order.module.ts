@@ -7,7 +7,7 @@ import { OrderController } from './order.controller';
 import { OrderRepository } from './order.repository';
 import { CartModule } from 'src/cart/cart.module';
 import { UserModule } from 'src/users/users.module';
-import { OrderDetailModule } from 'src/orderdetail/orderdetail.module';
+import { OrderDetailModule } from 'src/order-details/orderdetail.module';
 import { CartDetail } from 'src/entities/cartDetail.entity'; // Entidad
 import { CartRepository } from 'src/cart/cart.repository'; // Lo necesita tu OrderService
 

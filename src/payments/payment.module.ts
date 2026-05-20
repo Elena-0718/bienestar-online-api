@@ -9,7 +9,7 @@ import { Payment } from 'src/entities/payment.entity';
 import { Order } from 'src/entities/order.entity';
 
 import { OrderModule } from 'src/order/order.module';
-import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { SubscriptionModule } from 'src/subscriptions/subscription.module';
 import { DeliveryModule } from 'src/delivery/delivery.module'; // ✅ IMPORT
 
 @Module({

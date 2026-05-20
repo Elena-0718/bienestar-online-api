@@ -10,7 +10,7 @@ import { ConsultationService } from './consultation.service';
 import { ConsultationRepository } from './consultation.repository';
 
 import { UserModule } from 'src/users/users.module';
-import { SubscriptionModule } from '../subscription/subscription.module';
+import { SubscriptionModule } from '../subscriptions/subscription.module';
 import { ProfessionalModule } from 'src/professional/professional.module';
 
 @Module({

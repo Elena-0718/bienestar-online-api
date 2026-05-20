@@ -8,7 +8,7 @@ import { ProgressController } from './progress.controller';
 import { ProgressService } from './progress.service';
 import { ProgressRepository } from './progress.repository';
 
-import { SubscriptionModule } from '../subscription/subscription.module'; // 👈 CLAVE
+import { SubscriptionModule } from '../subscriptions/subscription.module'; // 👈 CLAVE
 
 @Module({
   imports: [

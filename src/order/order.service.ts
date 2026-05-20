@@ -10,7 +10,7 @@ import { Order, OrderStatus } from 'src/entities/order.entity';
 import { OrderRepository } from './order.repository';
 import { CartRepository } from 'src/cart/cart.repository';
 import { OrderDetail } from 'src/entities/order_detail.entity';
-import { OrderDetailRepository } from 'src/orderdetail/orderdetail.repository';
+import { OrderDetailRepository } from 'src/order-details/orderdetail.repository';
 import { UpdateOrderDto } from './dtos/update-order.dto';
 import { CreateOrderDto } from './dtos/create-order.dto'; // Importación necesaria
 

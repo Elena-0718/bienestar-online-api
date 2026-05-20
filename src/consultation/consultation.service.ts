@@ -7,7 +7,7 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { ConsultationRepository } from './consultation.repository';
-import { SubscriptionService } from '../subscription/subscription.service';
+import { SubscriptionService } from '../subscriptions/subscription.service';
 import { ConsultationStatus, Consultation } from 'src/entities/consultation.entity';
 import { UserService } from 'src/users/users.service';
 import { ProfessionalService } from 'src/professional/professional.service';

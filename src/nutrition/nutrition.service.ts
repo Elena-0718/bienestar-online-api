@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { NutritionRepository } from './nutrition.repository';
-import { SubscriptionRepository } from 'src/subscription/subscription.repository';
+import { SubscriptionRepository } from 'src/subscriptions/subscription.repository';
 import { ProfessionalRepository } from 'src/professional/professional.repository';
 
 import { CreateNutritionPlanDto } from './dtos/create-nutrition-plan.dto';

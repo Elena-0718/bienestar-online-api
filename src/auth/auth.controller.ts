@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { LoginDto } from 'src/credential/dtos/login.dto'; // ✅ Asegúrate de importar tu DTO de login
+import { LoginDto } from 'src/credentials/dtos/login.dto'; // ✅ Asegúrate de importar tu DTO de login
 
 @Controller('auth')
 export class AuthController {

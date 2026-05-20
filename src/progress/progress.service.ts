@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { ProgressRepository } from './progress.repository';
-import { SubscriptionRepository } from 'src/subscription/subscription.repository';
+import { SubscriptionRepository } from 'src/subscriptions/subscription.repository';
 import { CreateProgressDto } from './dtos/create-progress.dto';
 import { UpdateProgressDto } from './dtos/update-progress.dto';
 
