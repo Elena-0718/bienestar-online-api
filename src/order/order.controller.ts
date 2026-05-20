@@ -19,7 +19,7 @@ import {
 import { OrderService } from './order.service';
 import { RolesGuard } from 'src/auth/Guards/roles.guard';
 import { JwtAuthGuard } from 'src/auth/Guards/jwt-auth.guard';
-import { RolesDecorator } from 'src/decoratos/roles.decorator';
+import { RolesDecorator } from 'src/decorators/roles.decorator';
 import { Roles } from 'src/enum/roles.enum';
 import { UpdateOrderDto } from './dtos/update-order.dto';
 import { CreateOrderDto } from './dtos/create-order.dto'; // Importación añadida

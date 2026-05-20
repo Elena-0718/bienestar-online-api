@@ -15,7 +15,7 @@ import { ProgressService } from './progress.service';
 
 import { JwtAuthGuard } from 'src/auth/Guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/Guards/roles.guard';
-import { RolesDecorator } from 'src/decoratos/roles.decorator';
+import { RolesDecorator } from 'src/decorators/roles.decorator';
 import { Roles } from 'src/enum/roles.enum';
 
 import { CreateProgressDto } from './dtos/create-progress.dto';

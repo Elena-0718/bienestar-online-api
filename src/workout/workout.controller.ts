@@ -19,9 +19,9 @@ import { UpdateWorkoutPlanDto } from './dtos/update-workout-plan.dto';
 import { JwtAuthGuard } from '../auth/Guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/Guards/roles.guard';
 import { SubscriptionGuard } from '../auth/Guards/subscription.guard';
-import { RolesDecorator } from '../decoratos/roles.decorator';
+import { RolesDecorator } from '../decorators/roles.decorator';
 import { Roles } from '../enum/roles.enum';
-import { PlansAllowed } from '../decoratos/plans-allowed.decorator';
+import { PlansAllowed } from '../decorators/plans-allowed.decorator';
 import { PlanType } from '../entities/plan.entity';
 
 @ApiTags('Workout Plans')

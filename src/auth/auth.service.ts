@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 
 import { CredentialRepository } from 'src/credential/credential.repository';
 import { LoginDto } from 'src/credential/dtos/login.dto';
-import { SignUpDto } from 'src/credential/dtos/sing-up.dto';
+import { SignUpDto } from 'src/credential/dtos/sign-up.dto';
 import { UserRepository } from 'src/users/user.repository';
 
 @Injectable()

@@ -22,8 +22,8 @@ import { JwtAuthGuard } from '../auth/Guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/Guards/roles.guard';
 import { SubscriptionGuard } from '../auth/Guards/subscription.guard';
 
-import { RolesDecorator } from '../decoratos/roles.decorator';
-import { PlansAllowed } from 'src/decoratos/plans-allowed.decorator';
+import { RolesDecorator } from '../decorators/roles.decorator';
+import { PlansAllowed } from 'src/decorators/plans-allowed.decorator';
 
 @ApiTags('Nutrition Plans')
 @ApiBearerAuth('access-token')

@@ -8,7 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 
 import { SubscriptionRepository } from 'src/subscription/subscription.repository';
-import { PLANS_KEY } from 'src/decoratos/plans-allowed.decorator';
+import { PLANS_KEY } from 'src/decorators/plans-allowed.decorator';
 import { PlanType } from 'src/entities/plan.entity';
 import { Roles } from 'src/enum/roles.enum';
 

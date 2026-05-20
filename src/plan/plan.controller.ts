@@ -16,7 +16,7 @@ import { UpdatePlanDto } from './dtos/update-plan.dto';
 
 import { JwtAuthGuard } from '../auth/Guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/Guards/roles.guard';
-import { RolesDecorator } from 'src/decoratos/roles.decorator';
+import { RolesDecorator } from 'src/decorators/roles.decorator';
 import { Roles} from 'src/enum/roles.enum';
 
 @ApiTags('Plans')

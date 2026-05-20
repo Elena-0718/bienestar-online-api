@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, Matches, ValidateIf } from 'class-validator';
-import { MatchPassword } from 'src/decoratos/matchPassword.decorator';
+import { MatchPassword } from 'src/decorators/matchPassword.decorator';
 
 export class CreateCredentialDto {
   @ApiProperty({

@@ -25,7 +25,7 @@ import {
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { UserService } from './users.service';
 
-import { RolesDecorator } from 'src/decoratos/roles.decorator';
+import { RolesDecorator } from 'src/decorators/roles.decorator';
 import { Roles } from 'src/enum/roles.enum';
 import { JwtAuthGuard } from 'src/auth/Guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/Guards/roles.guard';

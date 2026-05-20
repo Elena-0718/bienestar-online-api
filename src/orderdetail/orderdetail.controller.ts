@@ -1,7 +1,7 @@
 import { Controller, Param, UseGuards, Get, HttpCode, HttpStatus, ParseUUIDPipe, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/Guards/jwt-auth.guard';
-import { RolesDecorator } from 'src/decoratos/roles.decorator';
+import { RolesDecorator } from 'src/decorators/roles.decorator';
 import { Roles } from 'src/enum/roles.enum';
 import { RolesGuard } from 'src/auth/Guards/roles.guard';
 import { OrderDetailService } from './orderdetail.service';
